@@ -12,6 +12,24 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+  services:
+      postgres:
+        image: postgres:17
+        env:
+          #POSTGRES_USER: app
+          #POSTGRES_PASSWORD: password
+          #POSTGRES_DB: documents
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U app -d documents"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,4 +43,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
+        env:
+         # DATABASE_URL: postgresql+psycopg://app:password@localhost:5432/documents
+          DATABASE_URL: postgresql+psycopg://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
         run: pytest
