@@ -5,7 +5,7 @@ from .database import Base, SessionLocal, engine
 from .models import Document
 
 
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Document API")
 
