@@ -42,6 +42,13 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Debug files
+        run: |
+          pwd
+          ls -la
+          ls -la app
+          python -c "import sys; print(sys.path)"
+
       - name: Run tests
         env:
          # DATABASE_URL: postgresql+psycopg://app:password@localhost:5432/documents
