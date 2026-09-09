@@ -42,6 +42,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Test PostgreSQL
+        env:
+          PGUSER: ${{ secrets.POSTGRES_USER }}
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          PGDATABASE: ${{ secrets.POSTGRES_DB }}
+        run: |
+          pg_isready -h localhost -p 5432
+          psql -h localhost -p 5432 -U "$PGUSER" -d "$PGDATABASE" -c "SELECT current_user, current_database();"
+
       - name: Debug files
         run: |
           pwd
@@ -54,15 +63,6 @@ jobs:
           python -c "import os; print(os.getcwd())"
           python -c "import app; print(app.__file__)"
           python -c "from app.main import app; print(app)"
-
-      - name: Test PostgreSQL
-        env:
-          PGUSER: ${{ secrets.POSTGRES_USER }}
-          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          PGDATABASE: ${{ secrets.POSTGRES_DB }}
-        run: |
-          pg_isready -h localhost -p 5432
-          psql -h localhost -p 5432 -U "$PGUSER" -d "$PGDATABASE" -c "SELECT current_user, current_database();"
 
       - name: Run tests
         env:
