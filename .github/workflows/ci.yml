@@ -49,6 +49,13 @@ jobs:
           ls -la app
           python -c "import sys; print(sys.path)"
 
+      - name: Debug Python import
+        run: |
+          python -c "import os; print(os.getcwd())"
+          python -c "import app; print(app.__file__)"
+          python -c "from app.main import app; print(app)"
+
+
       - name: Run tests
         env:
          # DATABASE_URL: postgresql+psycopg://app:password@localhost:5432/documents
