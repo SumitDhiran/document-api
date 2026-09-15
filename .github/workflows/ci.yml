@@ -12,60 +12,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          #POSTGRES_USER: app
-          #POSTGRES_PASSWORD: password
-          #POSTGRES_DB: documents
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U app -d documents"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Test PostgreSQL
-        env:
-          PGUSER: ${{ secrets.POSTGRES_USER }}
-          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          PGDATABASE: ${{ secrets.POSTGRES_DB }}
-        run: |
-          pg_isready -h localhost -p 5432
-          psql -h localhost -p 5432 -U "$PGUSER" -d "$PGDATABASE" -c "SELECT current_user, current_database();"
-
-      - name: Debug files
-        run: |
-          pwd
-          ls -la
-          ls -la app
-          python -c "import sys; print(sys.path)"
-
-      - name: Debug Python import
-        run: |
-          python -c "import os; print(os.getcwd())"
-          python -c "import app; print(app.__file__)"
-          python -c "from app.main import app; print(app)"
-
       - name: Run tests
         env:
-         # DATABASE_URL: postgresql+psycopg://app:password@localhost:5432/documents
-          DATABASE_URL: postgresql+psycopg://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
-        run: pytest
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        run: |
+          docker compose up -d db
+          docker compose run --rm api pytest -v
