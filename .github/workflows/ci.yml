@@ -23,4 +23,23 @@ jobs:
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         run: |
           docker compose up -d db
-          docker compose run --rm api pytest -v
+
+          docker compose run --rm api sh -c '
+            echo "=== CURRENT DIRECTORY ==="
+            pwd
+
+            echo "=== ROOT ==="
+            ls -la
+
+            echo "=== APP DIRECTORY ==="
+            ls -la app
+
+            echo "=== PYTHON PATH ==="
+            python -c "import sys; print(sys.path)"
+
+            echo "=== IMPORT TEST ==="
+            python -c "import app; print(app.__file__)"
+
+            echo "=== PYTEST ==="
+            pytest -v
+          '
