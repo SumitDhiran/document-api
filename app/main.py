@@ -54,3 +54,8 @@ def get_documents():
     db.close()
 
     return result
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
