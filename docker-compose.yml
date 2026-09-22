@@ -1,7 +1,8 @@
 services:
 
   api:
-    build: .
+    #build: .
+    image: ${DOCKER_IMAGE}
     container_name: document-api
     #ports:
     #  - "8000:8000"
