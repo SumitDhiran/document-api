@@ -56,6 +56,6 @@ def get_documents():
     return result
 
 
-@app.get("/health")
+@app.get("/health_v2")
 def health():
     return {"status": "ok"}
