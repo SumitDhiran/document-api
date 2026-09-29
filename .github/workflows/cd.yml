@@ -28,6 +28,9 @@ jobs:
       - name: Deploy DEV
         env:
           DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/document-api:${{ github.event.workflow_run.head_sha }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         run: |
           echo "Deploying: $DOCKER_IMAGE"
 
