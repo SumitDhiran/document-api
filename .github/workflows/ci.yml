@@ -13,13 +13,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/document-api:${{ github.sha }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        env:
-          DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/document-api:${{ github.sha }}
         run: |
           docker build -t "$DOCKER_IMAGE" .
 
@@ -28,7 +29,6 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/document-api:${{ github.sha }}
         run: |
           docker compose up -d db
 
@@ -61,7 +61,5 @@ jobs:
 
       - name: Push Docker image
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/document-api:${{ github.sha }}
         run: |
           docker push "$DOCKER_IMAGE"
