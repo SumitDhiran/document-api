@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-dev:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     #runs-on: ubuntu-latest
     runs-on: self-hosted
@@ -33,6 +33,67 @@ jobs:
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         run: |
           echo "Deploying: $DOCKER_IMAGE"
+
+          docker pull "$DOCKER_IMAGE"
+
+          #docker compose up -d
+
+  deploy-staging:
+    needs: deploy-dev
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ needs.deploy-dev.result == 'success' }}
+    runs-on: self-hosted
+    environment: STAGING
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Deploy STAGING
+        env:
+          DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/document-api:${{ github.event.workflow_run.head_sha }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        run: |
+          echo "Deploying STAGING: $DOCKER_IMAGE"
+
+          docker pull "$DOCKER_IMAGE"
+
+          docker compose up -d
+
+
+  deploy-production:
+    needs: deploy-staging
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ needs.deploy-staging.result == 'success' }}
+    runs-on: self-hosted
+    environment: PRODUCTION
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Deploy PRODUCTION
+        env:
+          DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/document-api:${{ github.event.workflow_run.head_sha }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        run: |
+          echo "Deploying PRODUCTION: $DOCKER_IMAGE"
 
           docker pull "$DOCKER_IMAGE"
 
